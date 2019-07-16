@@ -3,10 +3,12 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const jwt = require('express-jwt');
+const jwksRsa = require('jwks-rsa');
 
 const {startDatabase} = require('./database/mongo');
 const {insertAd, getAds} = require('./database/ads');
-const { deleteAd, updateAd} = require('./database/ads');
+const {deleteAd, updateAd} = require('./database/ads');
 const app = express();
 
 app.use(helmet());
@@ -17,6 +19,20 @@ app.use(morgan('combined'));
 app.get('/', async ( req, res ) => { 
   res.send(await getAds())
 });
+
+const jwtCheck = jwt({
+  secret: jwksRsa.expressJwtSecret({
+      cache: true,
+      rateLimit: true,
+      jwksRequestsPerMinute: 5,
+      jwksUri: 'https://dev-m96k806n.eu.auth0.com/.well-known/jwks.json'
+}),
+audience: 'james-auth.finaps.com',
+issuer: 'https://dev-m96k806n.eu.auth0.com/',
+algorithms: ['RS256']
+});
+
+app.use(jwtCheck);
 
 app.post('/', async (req, res) => {
   const newAd = req.body;

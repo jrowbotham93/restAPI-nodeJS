@@ -16,7 +16,6 @@ async function getDatabase(){
   return database;
 }
 
-
 // export two functions
 module.exports = {
   getDatabase, // return reference to database
